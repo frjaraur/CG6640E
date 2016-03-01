@@ -29,7 +29,7 @@ def show_menu_options():
     return option
 
 # This function print a client using a pretty format
-def print_client(client):
+def print_client(client, known_macs):
     if client[0] == []: name = 'Unknown PC'
     else: name = str(client[0][0])
     print ""
@@ -69,12 +69,46 @@ def get_file_content(lan_clients_data):
         text += "+---------------------------------------------+\n\n"
     return text
 
+# This function reads a KnownMACs file and return the values on a list
+def get_known_macs():
+    known_macs = []
+    path = raw_input("Enter complete path of KnownMACs text file: ")
+    try:
+        file = open(path, 'r')
+        print "\nOpen file:  [[ OK ]]"
+        file_content = file.read()
+        file_lines = []
+        i = 0
+        for line in file_content.split("\n"):
+            a, b = line.split(" ")
+            known_macs.append([])
+            known_macs[i].append(a)
+            known_macs[i].append(b)
+            i += 1
+        print "Getting file information:  [[ OK ]]"
+        file.close()
+        print "Close file:  [[ OK ]]"
+        return known_macs
+    except IOError: 
+        print("Open/Read file:  [[ ERROR ]]")
+        print("\tCheck if the path is correct.")
+        print("\tCheck if do you have permissions for read the file.")
+        print("\tThen, try again.")
+        sys.exit(0)
+
+
 # Get user information
 user = raw_input('\nEnter username [Left blank for default]: ')
 password = getpass('Enter password [Left blank for default]: ')
 
 if not user: user = 'admin'
 if not password: password = 'admin'
+
+# Get KnownMACs file content
+known_macs = []
+load_mac_file = raw_input('\nDo you want to load KnownMACs file?[y/N]: ')
+if load_mac_file == 'y' or load_mac_file == 'Y': 
+    known_macs = get_known_macs() # MAC [0] - Name [1]
 
 login_url = "http://192.168.1.1/login/Login.txt?password=" + password + "&user=" + user
 target_url = "http://192.168.1.1/basicLanUsers.html"
@@ -117,18 +151,18 @@ else:
 option = show_menu_options()
 if option == '1':
     for lcd in lan_clients_data:
-        print_client(lcd)
+        print_client(lcd, known_macs)
 elif option == '2':
     for lcd in lan_clients_data:
         if lcd[4][1] != ' Ethernet':
-            print_client(lcd)
+            print_client(lcd, known_macs)
 elif option == '3':
     for lcd in lan_clients_data:
         if lcd[4][1] == ' Ethernet':
-            print_client(lcd)
+            print_client(lcd, known_macs)
 elif option == '4':
     for lcd in lan_clients_data:
-        print_client(lcd)
+        print_client(lcd, known_macs)
     path = raw_input("WARNING!!! If the file exists, it will be overwrite.\nEnter complete path and name of new text file: ")
     try:
         file = open(path, 'w+')

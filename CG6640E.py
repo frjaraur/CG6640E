@@ -121,9 +121,11 @@ print_header()
 # Get user information
 user = raw_input('\nEnter username [Left blank for default]: ')
 password = getpass('Enter password [Left blank for default]: ')
+ip = raw_input('Router IP [Left blank for 192.168.1.1]: ')
 
 if not user: user = 'admin'
 if not password: password = 'admin'
+if not ip: ip = '192.168.1.1'
 
 # Get KnownMACs file content
 known_macs = []
@@ -133,8 +135,8 @@ if load_mac_file == 'y' or load_mac_file == 'Y':
 
 print_header()
 
-login_url = "http://192.168.1.1/login/Login.txt?password=" + password + "&user=" + user
-target_url = "http://192.168.1.1/basicLanUsers.html"
+login_url = "http://" + ip + "/login/Login.txt?password=" + password + "&user=" + user
+target_url = "http://" + ip + "/basicLanUsers.html"
 
 print "\nGetting information from the router..."
 # Use firefox to get page with javascript generated content

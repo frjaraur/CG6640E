@@ -8,21 +8,30 @@
 #
 # gNrg(at)tuta.io
 #
-import sys
+import sys, os
 from contextlib import closing
 from selenium.webdriver import Firefox # pip install selenium
 from selenium.webdriver.support.ui import WebDriverWait
-
 from bs4 import BeautifulSoup # easy_install beautifulsoup4
-
 from getpass import getpass
+
+# This function prints the script banner
+def print_header():
+    os.system("clear")
+    print "+--------------------------------------------------+"
+    print "|                                                  |"
+    print "|                    CG6640E.py                    |"
+    print "|                     by  gNrg                     |"
+    print "|                                                  |"
+    print "+--------------------------------------------------+"
+    print ""
 
 # This function shows menu options
 def show_menu_options():
     print("\t1 - )   Show all clients")
     print("\t2 - )   Show WiFi clients")
     print("\t3 - )   Show Ethernet clients")
-    print("\t4 - )   Show all clients and export to a text file")
+    print("\t4 - )   Show clients and save")
     print("\t5 - )   Exit")
     print("\n")
     option = raw_input("   Choose one of this options: ")
@@ -32,8 +41,8 @@ def show_menu_options():
 def print_client(client, known_macs):
     n = get_known_MAC_name(str(client[1][0]), known_macs)
     if n: name = n
-    elif client[0] == []: name = 'Unknown PC' + '   -   UNKNOWN HOST!!!'
-    else: name = str(client[0][0]) + '   -   UNKNOWN HOST!!!'
+    else: name = 'UNKNOWN HOST!'
+    if client[0] != []: name += ' - ' + str(client[0][0])
     print ""
     print "+---------------------------------------------+"
     print "| New Client:  " + name
@@ -64,8 +73,8 @@ def get_file_content(lan_clients_data, known_macs):
     for client in lan_clients_data:
         n = get_known_MAC_name(str(client[1][0]), known_macs)
         if n: name = n
-        elif client[0] == []: name = 'Unknown PC' + '   -   UNKNOWN HOST!!!'
-        else: name = str(client[0][0]) + '   -   UNKNOWN HOST!!!'
+        else: name = 'UNKNOWN HOST!'
+        if client[0] != []: name += ' - ' + str(client[0][0])
         text += "+---------------------------------------------+\n"
         text += "| New Client:  " + name + '\n'
         text += "+---------------------------------------------+\n"
@@ -87,7 +96,7 @@ def get_known_macs():
     path = raw_input("Enter complete path of KnownMACs text file: ")
     try:
         file = open(path, 'r')
-        print "\nOpen file:  [[ OK ]]"
+        print "\nOpen file:\t\t\t[[ OK ]]"
         file_content = file.read()
         file_lines = []
         i = 0
@@ -97,9 +106,9 @@ def get_known_macs():
             known_macs[i].append(a)
             known_macs[i].append(b)
             i += 1
-        print "Getting file information:  [[ OK ]]"
+        print "Getting file information:\t[[ OK ]]"
         file.close()
-        print "Close file:  [[ OK ]]"
+        print "Close file:\t\t\t[[ OK ]]"
         return known_macs
     except IOError: 
         print("Open/Read file:  [[ ERROR ]]")
@@ -108,7 +117,7 @@ def get_known_macs():
         print("\tThen, try again.")
         sys.exit(0)
 
-
+print_header()
 # Get user information
 user = raw_input('\nEnter username [Left blank for default]: ')
 password = getpass('Enter password [Left blank for default]: ')
@@ -121,6 +130,8 @@ known_macs = []
 load_mac_file = raw_input('\nDo you want to load KnownMACs file?[y/N]: ')
 if load_mac_file == 'y' or load_mac_file == 'Y': 
     known_macs = get_known_macs() # MAC [0] - Name [1]
+
+print_header()
 
 login_url = "http://192.168.1.1/login/Login.txt?password=" + password + "&user=" + user
 target_url = "http://192.168.1.1/basicLanUsers.html"
@@ -137,7 +148,7 @@ with closing(Firefox()) as browser:
         lambda x: x.find_element_by_name('instance'))
     # Store it to string variable
     page_source = browser.page_source
-print "Getting info:  [[ OK ]]\n"
+print "Getting info:\t\t\t[[ OK ]]\n"
 
 # Format the string to navigate it using BeautifulSoup
 soup = BeautifulSoup(page_source, 'lxml')
@@ -154,13 +165,14 @@ for client in lan_clients:
     client_data = []
 
 if len(lan_clients_data) > 0:
-    print "Clients Found:  [ " + str(len(lan_clients_data)) + " ]"
+    print "Clients Found:\t\t[ " + str(len(lan_clients_data)) + " ]\n"
 else: 
-    print "Clients Found:  [ 0 ]"
+    print "Clients Found:\t\t[ 0 ]\n"
     sys.exit(0)
 
 # Show&Process menu options
 option = show_menu_options()
+print_header()
 if option == '1':
     for lcd in lan_clients_data:
         print_client(lcd, known_macs)
@@ -178,12 +190,12 @@ elif option == '4':
     path = raw_input("WARNING!!! If the file exists, it will be overwrite.\nEnter complete path and name of new text file: ")
     try:
         file = open(path, 'w+')
-        print "\nCreating/Open file:  [[ OK ]]"
+        print "\nCreating/Open file:\t[[ OK ]]"
         file_content = get_file_content(lan_clients_data, known_macs)
         file.write(file_content)
-        print "Writing file:  [[ OK ]]"
+        print "Writing file:\t\t[[ OK ]]"
         file.close()
-        print "Close file:  [[ OK ]]"
+        print "Close file:\t\t[[ OK ]]"
         print "You can see the new file on: " + path
     except IOError: 
         print("Creating/Open file:  [[ ERROR ]]")

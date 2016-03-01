@@ -30,8 +30,10 @@ def show_menu_options():
 
 # This function print a client using a pretty format
 def print_client(client, known_macs):
-    if client[0] == []: name = 'Unknown PC'
-    else: name = str(client[0][0])
+    n = get_known_MAC_name(str(client[1][0]), known_macs)
+    if n: name = n
+    elif client[0] == []: name = 'Unknown PC' + '   -   UNKNOWN HOST!!!'
+    else: name = str(client[0][0]) + '   -   UNKNOWN HOST!!!'
     print ""
     print "+---------------------------------------------+"
     print "| New Client:  " + name
@@ -48,12 +50,22 @@ def print_client(client, known_macs):
     print "+---------------------------------------------+"
     print ""
 
+# This function return a string with a machine name if the MAC given exists into KnownMACs file
+def get_known_MAC_name(MAC, known_macs):
+    name = ''
+    for m in known_macs:
+        if m[0] == MAC:
+            name = m[1]
+    return name
+
 # This function return a string with all the information using a pretty format
-def get_file_content(lan_clients_data):
+def get_file_content(lan_clients_data, known_macs):
     text = "LAN CLIENTS INFORMATION\n"
     for client in lan_clients_data:
-        if client[0] == []: name = 'Unknown PC'
-        else: name = str(client[0][0])
+        n = get_known_MAC_name(str(client[1][0]), known_macs)
+        if n: name = n
+        elif client[0] == []: name = 'Unknown PC' + '   -   UNKNOWN HOST!!!'
+        else: name = str(client[0][0]) + '   -   UNKNOWN HOST!!!'
         text += "+---------------------------------------------+\n"
         text += "| New Client:  " + name + '\n'
         text += "+---------------------------------------------+\n"
@@ -167,7 +179,7 @@ elif option == '4':
     try:
         file = open(path, 'w+')
         print "\nCreating/Open file:  [[ OK ]]"
-        file_content = get_file_content(lan_clients_data)
+        file_content = get_file_content(lan_clients_data, known_macs)
         file.write(file_content)
         print "Writing file:  [[ OK ]]"
         file.close()
@@ -180,8 +192,3 @@ elif option == '4':
         print("\tThen, try again.")
         sys.exit(0)
 elif option == '5': exit(0)
-
-
-#https://stackoverflow.com/questions/8960288/get-page-generated-with-javascript-in-python
-#https://selenium-python.readthedocs.org/api.html#selenium.webdriver.remote.webdriver.WebDriver
-#http://www.crummy.com/software/BeautifulSoup/bs4/doc/index.html#navigating-using-tag-names

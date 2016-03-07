@@ -8,7 +8,7 @@
 #
 # gNrg(at)tuta.io
 #
-import sys, os
+import os
 from contextlib import closing
 from selenium.webdriver import Firefox # pip install selenium
 from selenium.webdriver.support.ui import WebDriverWait
@@ -44,9 +44,9 @@ def print_client(client, known_macs):
     else: name = 'UNKNOWN HOST!'
     if client[0] != []: name += ' - ' + str(client[0][0])
     print ""
-    print "+---------------------------------------------+"
-    print "| New Client:  " + name
-    print "+---------------------------------------------+"
+    print "+--------------------------------------------------+"
+    print "|     Client:  " + name
+    print "+--------------------------------------------------+"
     print "|        MAC:  " + str(client[1][0])
     print "|         IP:  " + str(client[2][0])
     print "|     Uptime:  " + str(client[3][0])
@@ -56,7 +56,7 @@ def print_client(client, known_macs):
         print "|      BSSID:  " + str(client[4][4])
         print "|   Protocol:  " + str(client[4][6])
     print "|  Addr Type:  " + str(client[5][0])
-    print "+---------------------------------------------+"
+    print "+--------------------------------------------------+"
     print ""
 
 # This function return a string with a machine name if the MAC given exists into KnownMACs file
@@ -75,9 +75,9 @@ def get_file_content(lan_clients_data, known_macs):
         if n: name = n
         else: name = 'UNKNOWN HOST!'
         if client[0] != []: name += ' - ' + str(client[0][0])
-        text += "+---------------------------------------------+\n"
-        text += "| New Client:  " + name + '\n'
-        text += "+---------------------------------------------+\n"
+        text += "+--------------------------------------------------+\n"
+        text += "|     Client:  " + name + '\n'
+        text += "+--------------------------------------------------+\n"
         text += "|        MAC:  " + str(client[1][0]) + '\n'
         text += "|         IP:  " + str(client[2][0]) + '\n'
         text += "|     Uptime:  " + str(client[3][0]) + '\n'
@@ -87,7 +87,7 @@ def get_file_content(lan_clients_data, known_macs):
             text += "|      BSSID:  " + str(client[4][4]) + '\n'
             text += "|   Protocol:  " + str(client[4][6]) + '\n'
         text += "|  Addr Type:  " + str(client[5][0]) + '\n'
-        text += "+---------------------------------------------+\n\n"
+        text += "+--------------------------------------------------+\n\n"
     return text
 
 # This function reads a KnownMACs file and return the values on a list
@@ -146,11 +146,15 @@ with closing(Firefox()) as browser:
     # button = browser.find_element_by_name('button')
     # button.click()
     # Wait for the page/js to load
-    WebDriverWait(browser, timeout=10).until(
-        lambda x: x.find_element_by_name('instance'))
+    try:
+        WebDriverWait(browser, timeout=10).until(
+            lambda x: x.find_element_by_name('instance'))
+    except: 
+        print "Getting info:\t\t[[ ERROR ]]\n"
+        exit(-1)
     # Store it to string variable
     page_source = browser.page_source
-print "Getting info:\t\t\t[[ OK ]]\n"
+print "Getting info:\t\t[[ OK ]]\n"
 
 # Format the string to navigate it using BeautifulSoup
 soup = BeautifulSoup(page_source, 'lxml')
@@ -170,7 +174,7 @@ if len(lan_clients_data) > 0:
     print "Clients Found:\t\t[ " + str(len(lan_clients_data)) + " ]\n"
 else: 
     print "Clients Found:\t\t[ 0 ]\n"
-    sys.exit(0)
+    exit(0)
 
 # Show&Process menu options
 option = show_menu_options()
@@ -191,7 +195,7 @@ elif option == '4':
         print_client(lcd, known_macs)
     path = raw_input("WARNING!!! If the file exists, it will be overwrite.\nEnter complete path and name of new text file: ")
     try:
-        file = open(path, 'w+')
+        file = open(path, 'w')
         print "\nCreating/Open file:\t[[ OK ]]"
         file_content = get_file_content(lan_clients_data, known_macs)
         file.write(file_content)
